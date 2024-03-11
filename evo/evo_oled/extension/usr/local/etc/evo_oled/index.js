@@ -62,7 +62,7 @@ function server(req,res){
 						DRIVER.refresh_action();
 					})
 				};
-				console.log("[EVO DISPLAY#2] CONTRAST set to:", CONTRAST)
+				console.log("[EVO DISPLAY#2", new Date(),"] CONTRAST set to:", CONTRAST)
 				PENDINGSETCONTRAST = true
 
 			}
@@ -129,15 +129,15 @@ ap_oled.prototype.listen_to = async function(api,frequency){
 	
 	if( api === "lms" ){
     
-   
-    
-			const getlocalStreamer = require('./lms/lms.js');
+		const getlocalStreamer = require('./lms/lms.js');
        
-      const streamer = await getlocalStreamer();
+        
+		const [streamer, lmsIp] = await getlocalStreamer();
+
       if(!streamer) {	
         clearInterval(this.update_interval);
         this.page = null;
-        this.lms_not_found_mode(x => this.listen_to(api));
+        this.lms_not_found_mode(x => this.listen_to(api), lmsIp);
         return;
       }
    
@@ -155,7 +155,7 @@ ap_oled.prototype.listen_to = async function(api,frequency){
         clearInterval(this.update_interval);
         clearInterval(sleepMonitor)
         this.page = null;
-        this.lms_not_found_mode(x => this.listen_to(api));
+        this.lms_not_found_mode(x => this.listen_to(api), streamer);
         return;
       })   
       
@@ -318,7 +318,7 @@ if (this.page === "clock") return;
 	
 }
 
-ap_oled.prototype.lms_not_found_mode = function(cb){
+ap_oled.prototype.lms_not_found_mode = function(cb, lmsIp){
 if (this.page === "lms_not_found") return;
 	clearInterval(this.update_interval);
 	this.page = "lms_not_found";
@@ -326,11 +326,19 @@ if (this.page === "lms_not_found") return;
 	this.refresh_action = ()=>{
 		
 		this.driver.buffer.fill(0x00);
-		
-		this.driver.setCursor(10, 0);
-		this.driver.writeString( fonts.monospace ,2,"LMS IS NOT RUNNING",3);
 
-		this.driver.setCursor(10, 25);
+
+		let fontSize = 2
+
+		this.driver.setCursor(10, 0);
+
+		this.driver.writeString( fonts.monospace ,fontSize,"pCP is not connected",4);
+
+		this.driver.setCursor(10, 20);
+
+		this.driver.writeString( fonts.monospace ,fontSize,"LMSIP: "+lmsIp,3);
+
+		this.driver.setCursor(10, 40);
 		this.driver.writeString( fonts.monospace ,2,"Retrying in... "+timer,3);
 		
 		this.driver.update(true);

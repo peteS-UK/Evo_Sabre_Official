@@ -297,7 +297,7 @@ _Connection.prototype.handleErr = function(error){
 _Connection.prototype.cleanUp = function(){
   
   console.log("cleanUp")
-  console.trace()
+  // console.trace()
   
 	for(let player of this.players){
 		player.removeAllListeners();
@@ -697,9 +697,9 @@ async function getlocalStreamer( path ){
 		error = err;
 	}
 	finally{
-    if(!localstreamer && connection) connection.cleanUp();
+		if(!localstreamer && connection) connection.cleanUp();
     else console.log("[LMS] : connected.")
-		return localstreamer;
+		return [localstreamer, config.host];
 	}
 }
 
